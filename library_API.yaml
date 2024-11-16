@@ -1,0 +1,163 @@
+openapi: 3.0.0
+info:
+  title: library API
+  description: 具有簡易圖書館功能的API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /books:
+    get:
+      summary: 書總攬
+      operationId: getBooks
+      responses:
+        '200':
+          description: A list of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+    post:
+      tags:
+        - book
+      summary: 新增書籍到圖書館
+      description: 新增書籍
+      operationId: addBook
+      requestBody:
+        description: 新增書籍到圖書館
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Book'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Book'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid input
+        '422':
+          description: Validation exception
+      security:
+        - petstore_auth:
+            - write:books
+            - read:books
+
+  /books/{bookId}:
+    get:
+      summary: 依照書的ID進行查詢
+      description: Returns a single book
+      operationId: getBookById
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Book not found
+      security:
+      - api_key: []
+      - petstore_auth:
+          - write:books
+          - read:books
+
+    put:
+      summary: 根據書的ID進行書籍資料更新
+      operationId: updateBookById
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: name
+          in: query
+          description: Name of book that needs to be updated(書名)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Book updated
+        '400':
+          description: Invalid input
+      security:
+      - petstore_auth:
+          - write:books
+          - read:books
+
+    delete:
+      tags:
+        - book
+      summary: 依照ID刪除書籍
+      description: 刪除書籍
+      operationId: deleteBook
+      parameters:
+        - name: api_key
+          in: header
+          description: ''
+          required: false
+          schema:
+            type: string
+        - name: bookId
+          in: path
+          description:  輸入要刪除的書籍ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid pet value
+      security:
+        - petstore_auth:
+            - write:books
+            - read:books
+
+components:
+  schemas:
+    Book:
+      type: object
+      required:
+        - id
+        - title
+        - author
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "The Great Gatsby"
+        author:
+          type: string
+          example: "F. Scott Fitzgerald"
